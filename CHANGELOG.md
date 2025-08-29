@@ -4,6 +4,59 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 2.9.2
+
+### Security
+- Admin API: Fixed self-revocation vulnerability where admins could accidentally revoke their own admin status via the single-user permission endpoint
+
+### Changed
+- Add new activity actor/type index. Greatly speeds up retrieval of rare types (like "Listen")
+- Docs: Restore DB schema before data to avoid long restore times
+- Return 404 with a better error message instead of 400 when receiving an activity for a deactivated user
+- Deleting an instance queues individual jobs for each user that needs to be deleted from the server.
+- Update Dockerfile to use Elixir 1.17.3, Erlang 26.2.5.6, and Alpine 3.17.9 to match CI release builds
+- Update Cowboy, Gun, and Plug family of dependencies
+- Hashtag searches return real results based on words in your query
+- Oban Notifier was changed to Oban.Notifiers.PG for performance and scalability benefits
+- Updated relayd/httpd config files to be on par with nginx
+- Updated Postgrex library to 0.20.0
+- Improved the logic of how we determine if a server is unreachable.
+- Relax alsoKnownAs requirements to just URI, not necessarily HTTP(S)
+- Change scrobble external link param name to use snake case
+- Change SMTP example to use the Mua adapter that works with OTP>25
+- Updated Tesla to 1.15.3
+- Truncate the length of Rich Media title and description fields
+- Don't require an Accept header for WebFinger queries and default to JSON.
+
+### Added
+- Support Dislike activity, as sent by Mitra and Friendica, by changing it into a thumbs-down EmojiReact
+- Support Mitra-style emoji likes.
+- Added a way to upload new packs from a URL or ZIP file via Admin API
+- Add `duration` to the block endpoint, which makes block expire
+- Expose markup configuration in InstanceView
+- Implement language detection with fastText
+- Added MRF.QuietReply which prevents replies to public posts from being published to the timelines
+- Add only_reblogs parameter to account statuses API for filtering to show only reblogs/reposts
+- Add `base_urls` to the /api/v1/instance pleroma metadata which provides information about the base URLs for media_proxy and uploads when configured
+- Allow Terms of Service panel behaviour to be configurable
+- Support translation providers (DeepL, LibreTranslate)
+
+### Fixed
+- Fix AssignAppUser migration OOM
+- Fix building "captcha" library with OpenBSD make
+- Use JSON for DeepL API requests
+- Elixir 1.18: Fixed warnings and new deprecations
+- Fix endorsement state display in relationship view
+- Set PATH in the FreeBSD rc script to avoid failures starting the service
+- Improved performance of status search queries using the default GIN index
+- Fix ModerationLog FunctionClauseError for unknown actions
+- replaced depracated flags and functions, renamed service to fit other service files
+- Fix federation issue where Public visibility information in cc field was lost when sent to remote servers, causing posts to appear with inconsistent visibility across instances
+- Fix release builds
+- Backport [Elixir PR 14242](https://github.com/elixir-lang/elixir/pull/14242) fixing racy mkdir and lack of error handling of parent directory creation
+- Fix HTTP client making invalid requests due to no percent encoding processing or validation.
+- Enforce an exact domain match for WebFinger resolution
+
 ## 2.9.1
 
 ### Security
