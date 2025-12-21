@@ -5,6 +5,7 @@
 defmodule Pleroma.Web.CommonAPI.ActivityDraft do
   alias Pleroma.Activity
   alias Pleroma.Conversation.Participation
+  alias Pleroma.Language.LanguageDetector
   alias Pleroma.Object
   alias Pleroma.Web.ActivityPub.Builder
   alias Pleroma.Web.ActivityPub.Visibility
@@ -90,7 +91,8 @@ defmodule Pleroma.Web.CommonAPI.ActivityDraft do
   defp listen_object(draft) do
     object =
       draft.params
-      |> Map.take([:album, :artist, :title, :length, :externalLink])
+      |> Map.take([:album, :artist, :title, :length])
+      |> Map.put(:externalLink, Map.get(draft.params, :external_link))
       |> Map.new(fn {key, value} -> {to_string(key), value} end)
       |> Map.put("type", "Audio")
       |> Map.put("to", draft.to)
@@ -255,13 +257,15 @@ defmodule Pleroma.Web.CommonAPI.ActivityDraft do
   end
 
   defp language(draft) do
-    language = draft.params[:language]
+    language =
+      with language <- draft.params[:language],
+           true <- good_locale_code?(language) do
+        language
+      else
+        _ -> LanguageDetector.detect(draft.content_html <> " " <> draft.summary)
+      end
 
-    if good_locale_code?(language) do
-      %__MODULE__{draft | language: language}
-    else
-      draft
-    end
+    %__MODULE__{draft | language: language}
   end
 
   defp object(draft) do

@@ -189,7 +189,7 @@ defmodule Pleroma.Web.Router do
   end
 
   pipeline :well_known do
-    plug(:accepts, ["activity+json", "json", "jrd", "jrd+json", "xml", "xrd+xml"])
+    plug(:accepts, ["activity+json", "json", "jrd", "jrd+json", "xml", "xrd+xml", "html"])
   end
 
   pipeline :config do
@@ -466,6 +466,7 @@ defmodule Pleroma.Web.Router do
       get("/import", EmojiPackController, :import_from_filesystem)
       get("/remote", EmojiPackController, :remote)
       post("/download", EmojiPackController, :download)
+      post("/download_zip", EmojiPackController, :download_zip)
 
       post("/files", EmojiFileController, :create)
       patch("/files", EmojiFileController, :update)
@@ -740,6 +741,7 @@ defmodule Pleroma.Web.Router do
     post("/statuses/:id/unbookmark", StatusController, :unbookmark)
     post("/statuses/:id/mute", StatusController, :mute_conversation)
     post("/statuses/:id/unmute", StatusController, :unmute_conversation)
+    post("/statuses/:id/translate", StatusController, :translate)
 
     post("/push/subscription", SubscriptionController, :create)
     get("/push/subscription", SubscriptionController, :show)
@@ -787,6 +789,7 @@ defmodule Pleroma.Web.Router do
     get("/instance", InstanceController, :show)
     get("/instance/peers", InstanceController, :peers)
     get("/instance/rules", InstanceController, :rules)
+    get("/instance/translation_languages", InstanceController, :translation_languages)
 
     get("/statuses", StatusController, :index)
     get("/statuses/:id", StatusController, :show)

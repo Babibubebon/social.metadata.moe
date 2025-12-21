@@ -6,6 +6,7 @@ defmodule Pleroma.Web.ActivityPub.Transmogrifier do
   @moduledoc """
   A module to handle coding from internal to wire ActivityPub and back.
   """
+  @behaviour Pleroma.Web.ActivityPub.Transmogrifier.API
   alias Pleroma.Activity
   alias Pleroma.EctoType.ActivityPub.ObjectValidators
   alias Pleroma.Maps
@@ -495,12 +496,24 @@ defmodule Pleroma.Web.ActivityPub.Transmogrifier do
   defp handle_incoming_normalized(
          %{
            "type" => "Like",
+           "content" => content
+         } = data,
+         options
+       )
+       when is_binary(content) do
+    data
+    |> Map.put("type", "EmojiReact")
+    |> handle_incoming_normalized(options)
+  end
+
+  defp handle_incoming_normalized(
+         %{
+           "type" => "Like",
            "_misskey_reaction" => reaction
          } = data,
          options
        ) do
     data
-    |> Map.put("type", "EmojiReact")
     |> Map.put("content", @misskey_reactions[reaction] || reaction)
     |> handle_incoming_normalized(options)
   end
@@ -650,6 +663,24 @@ defmodule Pleroma.Web.ActivityPub.Transmogrifier do
     else
       _e -> :error
     end
+  end
+
+  # Rewrite dislikes into the thumbs down emoji
+  defp handle_incoming_normalized(%{"type" => "Dislike"} = data, options) do
+    data
+    |> Map.put("type", "EmojiReact")
+    |> Map.put("content", "👎")
+    |> handle_incoming_normalized(options)
+  end
+
+  defp handle_incoming_normalized(
+         %{"type" => "Undo", "object" => %{"type" => "Dislike"}} = data,
+         options
+       ) do
+    data
+    |> put_in(["object", "type"], "EmojiReact")
+    |> put_in(["object", "content"], "👎")
+    |> handle_incoming_normalized(options)
   end
 
   defp handle_incoming_normalized(_, _), do: :error
@@ -876,6 +907,14 @@ defmodule Pleroma.Web.ActivityPub.Transmogrifier do
         |> Map.merge(Utils.make_json_ld_header())
 
       {:ok, data}
+    end
+  end
+
+  def prepare_outgoing(%{"type" => "Flag"} = data) do
+    with {:ok, stripped_activity} <- Utils.strip_report_status_data(data),
+         stripped_activity <- Utils.maybe_anonymize_reporter(stripped_activity),
+         stripped_activity <- Map.merge(stripped_activity, Utils.make_json_ld_header()) do
+      {:ok, stripped_activity}
     end
   end
 
