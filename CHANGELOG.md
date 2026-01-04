@@ -4,28 +4,40 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## 2.10.0
+## 2.10
 
 ### Security
 
 - Admin API: Fixed self-revocation vulnerability where admins could accidentally revoke their own admin status via the single-user permission endpoint
+- Fix bypass of the restrict unauthenticated setting by requesting local Activities
 
 ### Changed
 
-- Update Pleroma-FE to 2.9.2
 - Add new activity actor/type index. Greatly speeds up retrieval of rare types (like "Listen")
+- Use separate schemas for muted/blocked accounts lists
 - Docs: Restore DB schema before data to avoid long restore times
 - Return 404 with a better error message instead of 400 when receiving an activity for a deactivated user
 - Deleting an instance queues individual jobs for each user that needs to be deleted from the server.
 - Update Dockerfile to use Elixir 1.17.3, Erlang 26.2.5.6, and Alpine 3.17.9 to match CI release builds
+- Docs RUM index: Add OTP install command, update index size expectation and recommend VACUUM FULL
+- Support new Mastodon API for endorsed accounts
+- Allow FediIndex crawler bot by default
 - Update Cowboy, Gun, and Plug family of dependencies
 - Hashtag searches return real results based on words in your query
+- Support `quoted_status_id` parameter in post creation request
+- Use Mastodon-compatible route for quotes list and param for quotes count
+- Updated the example Nginx configuration
 - Oban Notifier was changed to Oban.Notifiers.PG for performance and scalability benefits
 - Updated relayd/httpd config files to be on par with nginx
+- Order favourites and reblogs list from newest to oldest
+- Update Pleroma-FE to 2.9.2
 - Updated Postgrex library to 0.20.0
 - Improved the logic of how we determine if a server is unreachable.
 - Relax alsoKnownAs requirements to just URI, not necessarily HTTP(S)
+- Redirect /users/:nickname.rss to /users/:nickname/feed.rss instead of .atom
+- Add `write:scrobbles` and `read:scrobbles` scope for scrobbling
 - Change scrobble external link param name to use snake case
+- Allow "invisible" and "ellipsis" classes for span tags to match Mastodon behavior
 - Change SMTP example to use the Mua adapter that works with OTP>25
 - Updated Tesla to 1.15.3
 - Truncate the length of Rich Media title and description fields
@@ -33,37 +45,67 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Oban.Plugins.Lazarus to help recover stuck jobs from an unclean shutdown of Pleroma
-- Allow anonymizing reports sent to remote servers
 - Support Dislike activity, as sent by Mitra and Friendica, by changing it into a thumbs-down EmojiReact
 - Support Mitra-style emoji likes.
 - Added a way to upload new packs from a URL or ZIP file via Admin API
 - Add `duration` to the block endpoint, which makes block expire
 - Expose markup configuration in InstanceView
+- Allow filtering users with `accepts_chat_messages` capability
+- Add `timelines_access` to InstanceView
 - Implement language detection with fastText
 - Added MRF.QuietReply which prevents replies to public posts from being published to the timelines
+- Oban.Plugins.Lazarus to help recover stuck jobs from an unclean shutdown of Pleroma
+- Add /api/v1/pleroma/outgoing_follow_requests
+- Allow users to select preferred frontend
+- Provide full replies collection in ActivityPub objects
+- Allow anonymizing reports sent to remote servers
 - Add only_reblogs parameter to account statuses API for filtering to show only reblogs/reposts
+- Allow setting custom user-agent for fetching rich media content
+- Scrubber: Allow `quote-inline` class in <p> tags used by Mastodon quotes
 - Add `base_urls` to the /api/v1/instance pleroma metadata which provides information about the base URLs for media_proxy and uploads when configured
+- Stream marker updates
 - Allow Terms of Service panel behaviour to be configurable
 - Support translation providers (DeepL, LibreTranslate)
+- Support Mozhi translation provider
+- Support translateLocally translation provider
 
 ### Fixed
 
-- Fix reports being rejected when the activity had an empty CC or TO field (instead of not having them at all)
+- AP C2S: Reject interactions with statuses not visible to Actor
 - Fix AssignAppUser migration OOM
+- Fix fetching public keys with authorized fetch enabled
 - Fix building "captcha" library with OpenBSD make
 - Use JSON for DeepL API requests
 - Elixir 1.18: Fixed warnings and new deprecations
 - Fix endorsement state display in relationship view
+- Fix publisher when publishing to a list of users
+- Fix reports being rejected when the activity had an empty CC or TO field (instead of not having them at all)
 - Set PATH in the FreeBSD rc script to avoid failures starting the service
 - Improved performance of status search queries using the default GIN index
+- Use end-of-string in regex for local `get_by_nickname`
+- Respect restrict_unauthenticated in /api/v1/accounts/lookup
+- MastodonAPI: Reject interactions with statuses not visible to user
 - Fix ModerationLog FunctionClauseError for unknown actions
+- MRF InlineQuotePolicy: Don't inline quoted post URL in Mastodon quote posts
+- Fix NodeInfo content-type
+- Add Actor images normalization from array of urls to string
+- Add `update` to @notification_types
 - replaced depracated flags and functions, renamed service to fit other service files
+- Allow to pin/unpip chats
 - Fix federation issue where Public visibility information in cc field was lost when sent to remote servers, causing posts to appear with inconsistent visibility across instances
+- OpenBSD relayd: Fix IPv6 example
 - Fix release builds
+- `remote_url` links to unproxied URL
+- Send push notifications for statuses from subscribed accounts
 - Backport [Elixir PR 14242](https://github.com/elixir-lang/elixir/pull/14242) fixing racy mkdir and lack of error handling of parent directory creation
+- Transmogrifier: convert "as:Public" to full w3 URL
+- Update voters count in remote polls when refreshing
+- Fix sometimes incorrect URI percent encoding
 - Fix HTTP client making invalid requests due to no percent encoding processing or validation.
+- ObjectView: Do not leak unsanitized internal representation of non-Create/non-Undo Activities on fetches
+- Fix WebFinger for split-domain setups
 - Enforce an exact domain match for WebFinger resolution
+- MastodonAPI: Fix misattribution of statuses when fetched via non-Announce Activity ID
 
 ## 2.9.1
 
